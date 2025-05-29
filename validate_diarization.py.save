@@ -1,0 +1,86 @@
+
+    with open(rttm_path, 'r') as f:
+        for line in f:
+            parts = line.strip().split()
+            if len(parts) < 9 or parts[0] != 'SPEAKER':
+                continue
+            # RTTM format: SPEAKER <file> <ch> <start> <dur> <NA> <NA> <speaker_id> <NA> <NA>
+            _, _, _, start, dur, *_, speaker_label, _, _ = parts
+            segments.append({
+                'start': float(start),
+                'duration': float(dur),
+                'predicted': speaker_label
+            })
+    return segments
+
+
+def play_segment(audio_path, start, duration):
+    data, sr = sf.read(audio_path, start=int(start * sr), frames=int(duration * sr))
+    # Normalize to 16-bit
+    audio = (data * (2**15 - 1) / np.max(np.abs(data))).astype(np.int16)
+    play_obj = sa.play_buffer(audio, num_channels=data.shape[1] if data.ndim > 1 else 1,
+                              bytes_per_sample=2, sample_rate=sr)
+    play_obj.wait_done()
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Validate diarization results interactively.")
+    parser.add_argument('--audio', type=Path, required=True, help='Path to WAV file')
+    parser.add_argument('--rttm', type=Path, required=True, help='Path to RTTM file')
+    parser.add_argument('--output', type=Path, default=Path('validation_results.csv'), help='CSV output file')
+    args = parser.parse_args()
+
+    # Load segments\    segments = parse_rttm(args.rttm)
+    total = len(segments)
+    results = []
+
+    print(f"Loaded {total} segments from {args.rttm}")
+    # Read audio once for sr reference\    global sr
+    _, sr = sf.read(args.audio, start=0, frames=0)
+
+    for idx, seg in enumerate(segments, 1):
+        start = seg['start']
+        duration = seg['duration']
+        pred = seg['predicted']
+        print(f"Segment {idx}/{total}: start={start:.2f}s, dur={duration:.2f}s, predicted speaker={pred}")
+        input("Press Enter to play segment...")
+        # Play
+        data, sr = sf.read(args.audio, start=int(start * sr), frames=int(duration * sr))
+        # mono or multi
+        channels = data.shape[1] if data.ndim > 1 else 1
+        audio = (data * (2**15 - 1) / np.max(np.abs(data))).astype(np.int16)
+        play_obj = sa.play_buffer(audio, num_channels=channels, bytes_per_sample=2, sample_rate=sr)
+        play_obj.wait_done()
+
+        is_speech = input("Is this a speech segment? (y/n) [y]: ").strip().lower() or 'y'
+        if is_speech not in ('y', 'n'):
+            is_speech = 'n'
+
+        correct_label = ''
+        if is_speech == 'y':
+            correct = input(f"Is the predicted speaker '{pred}' correct? (y/n) [y]: ").strip().lower() or 'y'
+            if correct != 'y':
+                correct_label = input("Enter the correct speaker label: ").strip()
+            else:
+                correct_label = pred
+
+        results.append({
+            'start': start,
+            'duration': duration,
+            'predicted': pred,
+            'is_speech': is_speech == 'y',
+            'correct': correct_label
+        })
+
+    # Write CSV
+    with open(args.output, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=['start', 'duration', 'predicted', 'is_speech', 'correct'])
+        writer.writeheader()
+        for row in results:
+            writer.writerow(row)
+
+    # Summary
+    total_speech = sum(1 for r in results if r['is_speech'])
+    correct_speech = sum(1 for r in results if r['is_speech'] and r['predicted'] == r['correct'])
+    speech_acc = correct_speech / total_speech * 100 
+q
