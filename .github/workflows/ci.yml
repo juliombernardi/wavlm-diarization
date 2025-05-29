@@ -4,6 +4,11 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    # 👇  add this block so python can import from src/
+    env:
+      PYTHONPATH: src
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
