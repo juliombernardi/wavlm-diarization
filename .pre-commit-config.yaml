@@ -1,0 +1,18 @@
+# .pre-commit-config.yaml
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.1
+    hooks:
+      - id: ruff
+      - id: ruff-format
+
+  - repo: https://github.com/christophmeissner/pytest-pre-commit
+    rev: 1.0.0
+    hooks:
+      - id: pytest
+        pass_filenames: false      # run the full suite every time
+        always_run: true
+        additional_dependencies:
+          - pytest-cov
+        entry: >
+          bash -c 'PYTHONPATH=src pytest -q --no-cov'

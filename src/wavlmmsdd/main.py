@@ -1,17 +1,17 @@
 # Standard library imports
 from typing import Annotated
 
-# Local imports
-from wavlmmsdd.audio.utils.utils import Build
+from wavlmmsdd.audio.diarization.diarize import Diarizer
 from wavlmmsdd.audio.feature.embedding import WavLMSV
 from wavlmmsdd.audio.preprocess.convert import Convert
 from wavlmmsdd.audio.preprocess.resample import Resample
-from wavlmmsdd.audio.diarization.diarize import Diarizer
+
+# Local imports
+from wavlmmsdd.audio.utils.utils import Build
 
 
-def main() -> Annotated[None, "No return value"]:
-    """
-    Demonstrate the audio processing workflow from a WAV file
+def main() -> Annotated[None, 'No return value']:
+    """Demonstrate the audio processing workflow from a WAV file
     to a diarization result.
 
     This function performs the following steps:
@@ -30,10 +30,10 @@ def main() -> Annotated[None, "No return value"]:
     >>> main()
     No direct output is produced, but the specified audio file is
     processed and the results are saved or printed as logs.
-    """
 
+    """
     # Audio Path
-    audio_path = ".data/test_chester.wav"
+    audio_path = '.data/test_chester.wav'
 
     # Resample to 16 kHz
     resampler = Resample(audio_file=audio_path)
@@ -56,5 +56,5 @@ def main() -> Annotated[None, "No return value"]:
     diarizer.run()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
