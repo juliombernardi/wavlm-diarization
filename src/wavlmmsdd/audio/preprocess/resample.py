@@ -1,5 +1,5 @@
 # Standard library imports
-from typing import Annotated, Tuple, Union
+from typing import Annotated
 
 # Third-party imports
 import torch
@@ -7,8 +7,7 @@ import torchaudio
 
 
 class Resample:
-    """
-    Resample is a class for converting an audio waveform to 16 kHz.
+    """Resample is a class for converting an audio waveform to 16 kHz.
 
     This class can be initialized either by providing an audio file path
     (from which the waveform and sample rate will be loaded) or by providing
@@ -55,19 +54,16 @@ class Resample:
     >>> new_waveform, new_sr = resampler.to_16k()
     >>> print(new_sr)
     16000
+
     """
 
     def __init__(
-            self,
-            audio_file: Annotated[Union[str, None],
-            "Path to an audio file or None"] = None,
-            waveform: Annotated[Union[torch.Tensor, None],
-            "Audio waveform or None"] = None,
-            sample_rate: Annotated[Union[int, None],
-            "Sample rate or None"] = None
+        self,
+        audio_file: Annotated[str | None, 'Path to an audio file or None'] = None,
+        waveform: Annotated[torch.Tensor | None, 'Audio waveform or None'] = None,
+        sample_rate: Annotated[int | None, 'Sample rate or None'] = None,
     ) -> None:
-        """
-        Initialize the Resample object.
+        """Initialize the Resample object.
 
         Depending on the provided parameters, either:
         - Load the audio file to get waveform and sample rate
@@ -91,6 +87,7 @@ class Resample:
             are provided.
         TypeError
             If any provided arguments are not of the expected type.
+
         """
         if audio_file is not None:
             if not isinstance(audio_file, str):
@@ -107,16 +104,13 @@ class Resample:
             self.sample_rate = sample_rate
         else:
             raise ValueError(
-                "Either 'audio_file' or ('waveform' + 'sample_rate') "
-                "must be provided."
+                "Either 'audio_file' or ('waveform' + 'sample_rate') must be provided."
             )
 
     def to_16k(
-            self
-    ) -> Annotated[Tuple[torch.Tensor, int],
-    "Resampled waveform and its new sample rate"]:
-        """
-        Resample the waveform to 16 kHz if needed.
+        self,
+    ) -> Annotated[tuple[torch.Tensor, int], 'Resampled waveform and its new sample rate']:
+        """Resample the waveform to 16 kHz if needed.
 
         If the waveform's sample rate is already 16 kHz,
         no resampling is performed.
@@ -134,6 +128,7 @@ class Resample:
         >>> new_waveform, new_sr = test_resampler.to_16k()
         >>> print(new_waveform.shape, new_sr)
         torch.Size([1, 16000]) 16000
+
         """
         if self.sample_rate == 16000:
             return self.waveform, self.sample_rate
@@ -144,15 +139,15 @@ class Resample:
         return self.waveform, self.sample_rate
 
 
-if __name__ == "__main__":
-    audio = ".data/example/ae.wav"
+if __name__ == '__main__':
+    audio = '.data/example/ae.wav'
 
     resample_instance = Resample(audio_file=audio)
     test_new_waveform, test_new_sr = resample_instance.to_16k()
-    print(f"Resampled waveform shape: {test_new_waveform.shape}, sample rate: {test_new_sr}")
+    print(f'Resampled waveform shape: {test_new_waveform.shape}, sample rate: {test_new_sr}')
 
     test_wave = torch.randn(1, 32000)
     test_sr: int = 48000
     test_resample_instance = Resample(waveform=test_wave, sample_rate=test_sr)
     new_waveform_test, new_sr_test = resample_instance.to_16k()
-    print(f"Resampled waveform shape: {new_waveform_test.shape}, sample rate: {new_sr_test}")
+    print(f'Resampled waveform shape: {new_waveform_test.shape}, sample rate: {new_sr_test}')

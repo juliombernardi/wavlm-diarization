@@ -3,10 +3,10 @@ import csv
 from pathlib import Path
 
 import numpy as np
-import soundfile as sf
 import simpleaudio as sa
+import soundfile as sf
 
-"""validate_diarization.py – interactive RTTM validator.
+"""validate_diarization.py - interactive RTTM validator.
 
 Run with
 ---------
@@ -20,13 +20,14 @@ python validate_diarization.py \
 # Helpers                                                                      #
 ###############################################################################
 
+
 def parse_rttm(rttm_path: Path):
     """Return a list of segments from an RTTM SPEAKER file."""
     segments = []
     with rttm_path.open() as f:
         for line in f:
             parts = line.strip().split()
-            if len(parts) < 9 or parts[0].upper() != "SPEAKER":
+            if len(parts) < 9 or parts[0].upper() != 'SPEAKER':
                 continue
             # RTTM: SPEAKER <file> <ch> <start> <dur> <NA> <NA> <spk_id> <NA> <NA>
             file_id = parts[1]
@@ -36,11 +37,11 @@ def parse_rttm(rttm_path: Path):
             speaker_id = parts[7]
             segments.append(
                 {
-                    "file_id": file_id,
-                    "channel": channel,
-                    "start": start,
-                    "duration": dur,
-                    "predicted": speaker_id,
+                    'file_id': file_id,
+                    'channel': channel,
+                    'start': start,
+                    'duration': dur,
+                    'predicted': speaker_id,
                 }
             )
     return segments
@@ -59,11 +60,14 @@ def play_segment(audio_path: Path, start: float, duration: float, sr: int):
 # Main                                                                         #
 ###############################################################################
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Interactively validate diarization RTTM output.")
-    parser.add_argument("--audio", required=True, type=Path, help="WAV file used for diarization")
-    parser.add_argument("--rttm", required=True, type=Path, help="RTTM file to validate")
-    parser.add_argument("--output", default="validation_results.csv", type=Path, help="CSV to store annotations")
+    parser = argparse.ArgumentParser(description='Interactively validate diarization RTTM output.')
+    parser.add_argument('--audio', required=True, type=Path, help='WAV file used for diarization')
+    parser.add_argument('--rttm', required=True, type=Path, help='RTTM file to validate')
+    parser.add_argument(
+        '--output', default='validation_results.csv', type=Path, help='CSV to store annotations'
+    )
     args = parser.parse_args()
 
     # Load audio once for sample-rate reference
@@ -71,61 +75,66 @@ def main():
 
     segments = parse_rttm(args.rttm)
     if not segments:
-        print(f"No SPEAKER lines found in {args.rttm}")
+        print(f'No SPEAKER lines found in {args.rttm}')
         return
 
-    print(f"Loaded {len(segments)} segments from {args.rttm}\n")
+    print(f'Loaded {len(segments)} segments from {args.rttm}\n')
 
     results = []
     for idx, seg in enumerate(segments, 1):
-        start = seg["start"]
-        dur = seg["duration"]
-        pred = seg["predicted"]
+        start = seg['start']
+        dur = seg['duration']
+        pred = seg['predicted']
 
-        print(f"[{idx}/{len(segments)}] {start:.2f}s–{start+dur:.2f}s  |  predicted: {pred}")
-        input("Press <Enter> to play…")
+        print(f'[{idx}/{len(segments)}] {start:.2f}s-{start + dur:.2f}s  |  predicted: {pred}')
+        input('Press <Enter> to play…')
         play_segment(args.audio, start, dur, sr)
 
         # Collect feedback
-        is_speech = (input("Is this speech? [y]/n: ").strip().lower() or "y") == "y"
+        is_speech = (input('Is this speech? [y]/n: ').strip().lower() or 'y') == 'y'
         correct_label = pred
         if is_speech:
-            correct = (input(f"Speaker label '{pred}' correct? [y]/n: ").strip().lower() or "y") == "y"
+            correct = (
+                input(f"Speaker label '{pred}' correct? [y]/n: ").strip().lower() or 'y'
+            ) == 'y'
             if not correct:
-                correct_label = input("Enter correct speaker label: ").strip() or pred
+                correct_label = input('Enter correct speaker label: ').strip() or pred
         else:
-            correct_label = "<non-speech>"
+            correct_label = '<non-speech>'
 
         results.append(
             {
-                "start": start,
-                "duration": dur,
-                "predicted": pred,
-                "is_speech": is_speech,
-                "correct": correct_label,
+                'start': start,
+                'duration': dur,
+                'predicted': pred,
+                'is_speech': is_speech,
+                'correct': correct_label,
             }
         )
-        print("____________________________________________________________\n")
+        print('____________________________________________________________\n')
 
     # Save CSV
-    with args.output.open("w", newline="") as f:
+    with args.output.open('w', newline='') as f:
         writer = csv.DictWriter(
             f,
-            fieldnames=["start", "duration", "predicted", "is_speech", "correct"],
+            fieldnames=['start', 'duration', 'predicted', 'is_speech', 'correct'],
         )
         writer.writeheader()
         writer.writerows(results)
 
     # Summary
     total = len(results)
-    speech_total = sum(r["is_speech"] for r in results)
-    correct_labels = sum(
-        1 for r in results if r["is_speech"] and r["predicted"] == r["correct"]
-    )
+    speech_total = sum(r['is_speech'] for r in results)
+    correct_labels = sum(1 for r in results if r['is_speech'] and r['predicted'] == r['correct'])
     speech_acc = (correct_labels / speech_total * 100) if speech_total else 0.0
 
-    print("Validation complete!\n" f"Speech segments: {speech_total}/{total}\n" f"Speaker-label accuracy: {speech_acc:.1f}%\n" f"Annotations saved to {args.output}\n")
+    print(
+        'Validation complete!\n'
+        f'Speech segments: {speech_total}/{total}\n'
+        f'Speaker-label accuracy: {speech_acc:.1f}%\n'
+        f'Annotations saved to {args.output}\n'
+    )
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

@@ -1,5 +1,4 @@
 [build-system]
-
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -7,9 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "wavlmmsdd"
 version = "1.0.0"
 description = "WavLM based diarization with MSDD"
-authors = [
-    { name = "Bunyamin Ergen", email = "info@bunyaminergen.com" }
-]
+authors = [{ name = "Bunyamin Ergen", email = "info@bunyaminergen.com" }]
 license = { file = "LICENSE" }
 readme = "README.md"
 keywords = ["speech", "diarization", "wavlm", "msdd"]
@@ -17,7 +14,7 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
 ]
 requires-python = ">=3.11"
 
@@ -27,11 +24,11 @@ dependencies = [
     "torchaudio==2.6.0",
     "transformers==4.48.3",
     "omegaconf==2.3.0",
-    "numpy==1.26.4"
+    "numpy==1.26.4",
 ]
 
 [project.urls]
-"Source Code" = "https://github.com/bunyaminergen/wavlmmsdd"
+"Source Code"   = "https://github.com/bunyaminergen/wavlmmsdd"
 "Issue Tracker" = "https://github.com/bunyaminergen/wavlmmsdd/issues"
 
 [project.scripts]
@@ -43,3 +40,38 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+# ────────────────────────────
+# Ruff (formatter + linter)
+# ────────────────────────────
+[tool.ruff]                     # global settings
+line-length    = 100
+target-version = "py312"
+src            = ["src", "tests"]   # import roots (unchanged)
+
+[tool.ruff.format]              # Black-style formatter
+indent-style  = "space"
+quote-style   = "single"
+
+[tool.ruff.lint]                # NEW: linter-specific settings
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "N",   # pep8-naming
+  "D",   # pydocstyle
+  "UP",  # pyupgrade
+  "RUF", # ruff misc.
+]
+ignore = [
+  # Temporarily silence docstring rules until we finish writing them
+  "D100", "D103", "D104", "D205",
+]
+exclude = ["notebook/*"]        # skip Jupyter notebooks
+
+# ────────────────────────────
+# pytest
+# ────────────────────────────
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts   = "-ra --strict-markers --cov=src --cov-report=term-missing"

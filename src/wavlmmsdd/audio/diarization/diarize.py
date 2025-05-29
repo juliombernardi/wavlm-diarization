@@ -1,18 +1,18 @@
 # Standard library imports
-from typing import Annotated, Union
 from importlib.resources import files
+from typing import Annotated
+
+from nemo.collections.asr.models import ClusteringDiarizer
 
 # Third-party imports
 from omegaconf import OmegaConf
-from nemo.collections.asr.models import ClusteringDiarizer
 
 # Local imports
 from wavlmmsdd.audio.feature.embedding import WavLMSV
 
 
 class Diarizer:
-    """
-    Diarizer class that performs speaker diarization using NeMo's
+    """Diarizer class that performs speaker diarization using NeMo's
     ClusteringDiarizer with custom embeddings from a `WavLMSV` object.
 
     This class loads a diarization configuration from a YAML file and
@@ -35,17 +35,15 @@ class Diarizer:
         Configuration object for diarization loaded from a YAML file.
     clustering_diarizer : nemo.collections.asr.models.ClusteringDiarizer
         The NeMo ClusteringDiarizer initialized with the provided config.
+
     """
 
     def __init__(
-            self,
-            embedding: Annotated[Union[WavLMSV, None],
-            "WavLMSV embedding object"] = None,
-            manifest_path: Annotated[Union[str, None],
-            "Path to the manifest file"] = None
+        self,
+        embedding: Annotated[WavLMSV | None, 'WavLMSV embedding object'] = None,
+        manifest_path: Annotated[str | None, 'Path to the manifest file'] = None,
     ) -> None:
-        """
-        Initialize the Diarizer object with the specified embedding and
+        """Initialize the Diarizer object with the specified embedding and
         manifest path.
 
         Parameters
@@ -69,11 +67,11 @@ class Diarizer:
         >>> from wavlmmsdd.audio.feature.embedding import WavLMSV
         >>> embed = WavLMSV()
         >>> diarizer = Diarizer(embedding=embed, manifest_path="manifest.json")
+
         """
         if embedding is None:
             raise ValueError(
-                "The 'embedding' parameter cannot be None. "
-                "A WavLMSV object is expected."
+                "The 'embedding' parameter cannot be None. A WavLMSV object is expected."
             )
         if not isinstance(embedding, WavLMSV):
             raise TypeError("Expected 'embedding' to be a 'WavLMSV' instance.")
@@ -81,11 +79,11 @@ class Diarizer:
         if manifest_path is not None and not isinstance(manifest_path, str):
             raise TypeError("Expected 'manifest_path' to be a string if provided.")
 
-        default_config = files("wavlmmsdd.audio.config") / "diar_infer_telephonic.yaml"
+        default_config = files('wavlmmsdd.audio.config') / 'diar_infer_telephonic.yaml'
         diar_config_path = str(default_config)
 
         if manifest_path is None:
-            manifest_path = ".temp/manifest.json"
+            manifest_path = '.temp/manifest.json'
 
         self.cfg = OmegaConf.load(diar_config_path)
         self.cfg.diarizer.manifest_filepath = manifest_path
@@ -94,8 +92,7 @@ class Diarizer:
         self.clustering_diarizer.speaker_embeddings = embedding
 
     def run(self) -> None:
-        """
-        Perform the diarization process using the initialized ClusteringDiarizer.
+        """Perform the diarization process using the initialized ClusteringDiarizer.
 
         Returns
         -------
@@ -109,21 +106,21 @@ class Diarizer:
         >>> diarizer = Diarizer(embedding=embed, manifest_path="manifest.json")
         >>> diarizer.run()
         Diarization Completed!
+
         """
         self.clustering_diarizer.diarize()
-        print("Diarization Completed!")
+        print('Diarization Completed!')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # Local imports
-    from wavlmmsdd.audio.utils.utils import Build
     from wavlmmsdd.audio.feature.embedding import WavLMSV
     from wavlmmsdd.audio.preprocess.convert import Convert
     from wavlmmsdd.audio.preprocess.resample import Resample
-    from wavlmmsdd.audio.feature.embedding import WavLMSV
+    from wavlmmsdd.audio.utils.utils import Build
 
     # Audio Path
-    audio_path = ".data/example/ae.wav"
+    audio_path = '.data/example/ae.wav'
 
     # Resample to 16 kHz
     resampler = Resample(audio_file=audio_path)
