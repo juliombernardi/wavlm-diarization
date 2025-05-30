@@ -9,6 +9,9 @@ from omegaconf import OmegaConf
 
 # Local imports
 from wavlmmsdd.audio.feature.embedding import WavLMSV
+from wavlmmsdd.utils.logger import get_logger
+
+LOG = get_logger(__name__)
 
 
 class Diarizer:
@@ -109,7 +112,7 @@ class Diarizer:
 
         """
         self.clustering_diarizer.diarize()
-        print('Diarization Completed!')
+        LOG.info('Diarization Completed!')
 
 
 if __name__ == '__main__':

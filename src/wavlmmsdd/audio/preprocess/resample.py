@@ -5,6 +5,10 @@ from typing import Annotated
 import torch
 import torchaudio
 
+from wavlmmsdd.utils.logger import get_logger
+
+LOG = get_logger(__name__)
+
 
 class Resample:
     """Resample is a class for converting an audio waveform to 16 kHz.
@@ -144,10 +148,18 @@ if __name__ == '__main__':
 
     resample_instance = Resample(audio_file=audio)
     test_new_waveform, test_new_sr = resample_instance.to_16k()
-    print(f'Resampled waveform shape: {test_new_waveform.shape}, sample rate: {test_new_sr}')
+    LOG.info(
+        'Resampled waveform shape: %s, sample rate: %s',
+        test_new_waveform.shape,
+        test_new_sr,
+    )
 
     test_wave = torch.randn(1, 32000)
     test_sr: int = 48000
     test_resample_instance = Resample(waveform=test_wave, sample_rate=test_sr)
     new_waveform_test, new_sr_test = resample_instance.to_16k()
-    print(f'Resampled waveform shape: {new_waveform_test.shape}, sample rate: {new_sr_test}')
+    LOG.info(
+        'Resampled waveform shape: %s, sample rate: %s',
+        new_waveform_test.shape,
+        new_sr_test,
+    )
