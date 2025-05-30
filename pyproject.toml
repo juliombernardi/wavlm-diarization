@@ -33,6 +33,8 @@ dependencies = [
 
 [project.scripts]
 wavlmmsdd = "wavlmmsdd.main:main"
+validate-diarization = "wavlmmsdd.tools.validate_diarization:main"
+vad-sweep = "wavlmmsdd.tools.vad_sweep:main"
 
 [tool.setuptools]
 package-dir = { "" = "src" }
