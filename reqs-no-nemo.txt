@@ -3,3 +3,6 @@ torchaudio==2.6.0
 transformers==4.48.3
 omegaconf==2.3.0
 numpy==1.26.4
+simpleaudio
+soundfile
+librosa
