@@ -8,6 +8,10 @@ from omegaconf import DictConfig, OmegaConf
 from torch import Tensor
 from transformers import Wav2Vec2FeatureExtractor, WavLMForXVector
 
+from wavlmmsdd.utils.logger import get_logger
+
+LOG = get_logger(__name__)
+
 
 class WavLMSV:
     """WavLMSV is a class designed to load a WavLM XVector model from the
@@ -96,7 +100,7 @@ class WavLMSV:
         device_option = device_list[0]
 
         if device_option == 'cuda' and not torch.cuda.is_available():
-            print('[WARNING] CUDA is not available. Falling back to CPU.')
+            LOG.warning('CUDA is not available. Falling back to CPU.')
             device_option = 'cpu'
 
         self.device = device_option
@@ -109,13 +113,13 @@ class WavLMSV:
                 f'Allowed models are: {allowed_models}'
             )
 
-        print(f'[INFO] Loading XVector model: {model_name} on device: {self.device}')
+        LOG.info('Loading XVector model: %s on device: %s', model_name, self.device)
         self.feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(model_name)
         self.model = WavLMForXVector.from_pretrained(model_name).to(self.device)
         self.model.eval()
 
         self.xvector_dim = self.model.config.xvector_output_dim
-        print(f'[INFO] XVector dimension: {self.xvector_dim}')
+        LOG.info('XVector dimension: %d', self.xvector_dim)
 
     def extract(
         self,

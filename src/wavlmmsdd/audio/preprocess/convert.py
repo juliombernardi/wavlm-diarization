@@ -7,6 +7,10 @@ from typing import Annotated
 import torch
 import torchaudio
 
+from wavlmmsdd.utils.logger import get_logger
+
+LOG = get_logger(__name__)
+
 
 class Convert:
     """Convert is a class for converting an audio waveform to mono
@@ -204,7 +208,7 @@ class Convert:
         os.makedirs(dir_name, exist_ok=True)
 
         torchaudio.save(output_path, self.waveform, self.sample_rate)
-        print(f'[Convert.save] 16k+mono file saved: {output_path}')
+        LOG.info('16k+mono file saved: %s', output_path)
         return output_path
 
 
@@ -213,11 +217,11 @@ if __name__ == '__main__':
     test_converter = Convert(audio_file=audio)
     test_converter.to_mono()
     output = test_converter.save()
-    print(f'Saved file: {output}')
+    LOG.info('Saved file: %s', output)
 
     test_waveform = torch.randn(2, 48000)
     rate = 48000
     converter_direct = Convert(waveform=test_waveform, sample_rate=rate)
     converter_direct.to_mono()
     output_path_direct = converter_direct.save('.temp/mono_example.wav')
-    print(f'Saved file: {output_path_direct}')
+    LOG.info('Saved file: %s', output_path_direct)
