@@ -1,12 +1,19 @@
 # Directories
 .idea
-.temp
+.temp/
 .agile
+.venv/
 
-__pycache__
+**/__pycache__/
 
+# Ignore Python bytecode and intermediate saves
+*.py[cod]
+*.save*
+
+# Ignore notebook artefacts and large audio
 notebook/.data
 notebook/.ipynb_checkpoints
+*.wav
 
 build
 src/wavlmmsdd.egg-info
